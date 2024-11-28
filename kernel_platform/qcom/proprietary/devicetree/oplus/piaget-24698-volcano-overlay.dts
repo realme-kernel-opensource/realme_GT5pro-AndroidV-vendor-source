@@ -1,0 +1,16 @@
+/dts-v1/;
+/plugin/;
+#include "piaget_24698_common.dtsi"
+#include "nfc/piaget-nfc-thn31f.dtsi"
+#include "region-id.h.dtsi"
+
+
+
+/ {
+    model = "Qualcomm Technologies, Inc. volcano MTP,Piaget";
+
+    oplus,project-id = <24698>;
+    oplus,hw-id = <OPLUS_EVB1 OPLUS_T0 OPLUS_EVT1 OPLUS_DVT1 OPLUS_PVT1>;
+    oplus,region-id = <REGION_UNKNOWN REGION_CN REGION_IN REGION_APAC REGION_JP REGION_US>;
+};
+

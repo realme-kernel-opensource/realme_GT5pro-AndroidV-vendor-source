@@ -1,0 +1,10 @@
+&soc {
+    //add for 7635
+    oplus_secure_common {
+        compatible = "oplus,secure_common";
+        oplus,sec_reg_num = <0x221C8C70>;
+        oplus,sec_en_anti_reg = <0x221C8314>;
+        oplus,sec_override1_reg = <0x221C8314>;
+        oplus,override1_en_value = <0x1>;
+    };
+};
