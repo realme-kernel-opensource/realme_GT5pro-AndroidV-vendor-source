@@ -483,9 +483,6 @@ static inline void oplus_set_inherit_ux_start(struct task_struct *t, u64 start_t
 static inline void init_task_ux_info(struct task_struct *t)
 {
 	struct oplus_task_struct *ots = get_oplus_task_struct(t);
-#ifdef CONFIG_HMBIRD_SCHED_GKI
-	struct oplus_task_struct *curr_ots = get_oplus_task_struct(current);
-#endif
 	if (IS_ERR_OR_NULL(ots))
 		return;
 
@@ -549,30 +546,6 @@ static inline void init_task_ux_info(struct task_struct *t)
 #if IS_ENABLED(CONFIG_ARM64_AMU_EXTN) && IS_ENABLED(CONFIG_OPLUS_FEATURE_CPU_JANKINFO)
 	ots->amu_cycle = 0;
 	ots->amu_instruct = 0;
-#endif
-#ifdef CONFIG_HMBIRD_SCHED_GKI
-	ots->scx.dsq		= NULL;
-	INIT_LIST_HEAD(&ots->scx.dsq_node.fifo);
-	RB_CLEAR_NODE(&ots->scx.dsq_node.priq);
-	ots->scx.flags		= 0;
-	ots->scx.dsq_flags	= 0;
-	ots->scx.sticky_cpu	= -1;
-	ots->scx.runnable_at	= INITIAL_JIFFIES;
-	ots->scx.slice		= SCX_SLICE_DFL;
-	ots->scx.sched_prop = 0;
-	ots->scx.ext_flags	= 0;
-	ots->scx.prio_backup = 0;
-	ots->scx.gdsq_idx = DEFAULT_CGROUP_DL_IDX;
-	memset(&ots->scx.sts, 0, sizeof(struct scx_task_stats));
-	if (!IS_ERR_OR_NULL(curr_ots)) {
-		if ((curr_ots->scx.ext_flags & EXT_FLAG_RT_CHANGED)
-					&& !t->sched_reset_on_fork) {
-			ots->scx.ext_flags |= EXT_FLAG_RT_CHANGED;
-			ots->scx.prio_backup = curr_ots->scx.prio_backup;
-		}
-		if (curr_ots->scx.ext_flags & EXT_FLAG_CFS_CHANGED)
-			ots->scx.ext_flags |= EXT_FLAG_CFS_CHANGED;
-	}
 #endif
 };
 

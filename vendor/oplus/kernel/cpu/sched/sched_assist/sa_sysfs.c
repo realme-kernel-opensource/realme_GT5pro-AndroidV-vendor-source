@@ -28,10 +28,6 @@
 #include "sa_pipeline.h"
 #endif
 
-#ifdef CONFIG_HMBIRD_SCHED_GKI
-#include <linux/sched/sched_ext.h>
-#endif
-
 #define OPLUS_SCHEDULER_PROC_DIR		"oplus_scheduler"
 #define OPLUS_SCHEDASSIST_PROC_DIR		"sched_assist"
 
@@ -1033,67 +1029,6 @@ static ssize_t proc_ncsw_read(struct file *file, char __user *buf,
 	return simple_read_from_buffer(buf, count, ppos, buffer, len);
 }
 #endif
-#if defined(CONFIG_HMBIRD_SCHED) || defined(CONFIG_HMBIRD_SCHED_GKI)
-pid_t g_read_sp_pid = -1;
-static ssize_t proc_sched_prop_write(struct file *file, const char __user *buf,
-		size_t count, loff_t *ppos)
-{
-	char buffer[MAX_SET];
-	int pid;
-	unsigned long sched_prop;
-	struct task_struct *task;
-	int ret = -1;
-
-	memset(buffer, 0, sizeof(buffer));
-
-	if (count > sizeof(buffer) - 1)
-		count = sizeof(buffer) - 1;
-
-	if (copy_from_user(buffer, buf, count))
-		return -EFAULT;
-
-	buffer[count] = '\0';
-	if (sscanf(buffer, "%d %lu\n", &pid, &sched_prop) != 2)
-		goto exit;
-
-	if (pid > 0 && pid <= PID_MAX_LIMIT) {
-		rcu_read_lock();
-		task = find_task_by_vpid(pid);
-		if (task)
-			ret = sched_set_sched_prop(task, sched_prop);
-		rcu_read_unlock();
-	}
-exit:
-	g_read_sp_pid = ret ? -1 : pid;
-	return count;
-}
-
-static ssize_t proc_sched_prop_read(struct file *file, char __user *buf,
-		size_t count, loff_t *ppos)
-{
-	char buffer[64];
-	size_t len;
-	struct task_struct *task;
-	unsigned long sp;
-	pid_t pid = -1;
-	if (g_read_sp_pid != -1) {
-		rcu_read_lock();
-		task = find_task_by_vpid(g_read_sp_pid);
-		if (task) {
-			sp = sched_get_sched_prop(task);
-			if (sp != (unsigned long)-1)
-				pid = task->pid;
-		}
-		rcu_read_lock();
-	}
-	if (pid == -1)
-		len = snprintf(buffer, sizeof(buffer), "-1\n");
-	else
-		len = snprintf(buffer, sizeof(buffer), "%d %lu\n", pid, sp);
-
-	return simple_read_from_buffer(buf, count, ppos, buffer, len);
-}
-#endif
 
 static const struct proc_ops proc_sched_assist_enabled_fops = {
 	.proc_write		= proc_sched_assist_enabled_write,
@@ -1163,13 +1098,6 @@ static const struct proc_ops proc_retired_instrs_fops = {
 
 static const struct proc_ops proc_ncsw_fops = {
 	.proc_read		= proc_ncsw_read,
-};
-#endif
-#if defined(CONFIG_HMBIRD_SCHED) || defined(CONFIG_HMBIRD_SCHED_GKI)
-static const struct proc_ops proc_sched_prop_fops = {
-	.proc_write		= proc_sched_prop_write,
-	.proc_read		= proc_sched_prop_read,
-	.proc_lseek		= default_llseek,
 };
 #endif
 
@@ -1266,13 +1194,6 @@ int oplus_sched_assist_proc_init(void)
 	if (!proc_node) {
 		ux_err("failed to create proc node ncsw\n");
 		remove_proc_entry("nr_switches", d_sched_assist);
-	}
-#endif
-#if defined(CONFIG_HMBIRD_SCHED) || defined(CONFIG_HMBIRD_SCHED_GKI)
-	proc_node = proc_create("sched_prop", 0666, d_sched_assist, &proc_sched_prop_fops);
-	if (!proc_node) {
-		ux_err("failed to create proc node sched_prop\n");
-		remove_proc_entry("sched_prop", d_sched_assist);
 	}
 #endif
 

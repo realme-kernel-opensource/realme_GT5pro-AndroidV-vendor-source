@@ -119,21 +119,6 @@ void register_sched_assist_locking_ops(struct sched_assist_locking_ops *ops)
 EXPORT_SYMBOL_GPL(register_sched_assist_locking_ops);
 #endif
 
-#ifdef CONFIG_HMBIRD_SCHED
-struct hmbird_ops_t {
-	bool (*task_is_scx)(struct task_struct *p);
-};
-struct hmbird_ops_t *hmbird_sched_ops __read_mostly;
-void register_hmbird_sched_ops(struct hmbird_ops_t *ops)
-{
-	if (!ops)
-		return;
-	if (cmpxchg(&hmbird_sched_ops, NULL, ops))
-		pr_warn("hmbird_sched_ops has already been registered!\n");
-}
-EXPORT_SYMBOL_GPL(register_hmbird_sched_ops);
-#endif
-
 #define TOPAPP 4
 #define BGAPP  3
 
@@ -784,11 +769,6 @@ inline bool test_task_is_fair(struct task_struct *task)
 {
 	DEBUG_BUG_ON(!task);
 
-#ifdef CONFIG_HMBIRD_SCHED
-	if (hmbird_sched_ops && hmbird_sched_ops->task_is_scx
-				&& hmbird_sched_ops->task_is_scx(task))
-		return false;
-#endif
 	/* valid CFS priority is MAX_RT_PRIO..MAX_PRIO-1 */
 	if ((task->prio >= MAX_RT_PRIO) && (task->prio <= MAX_PRIO-1))
 		return true;
@@ -798,12 +778,6 @@ inline bool test_task_is_fair(struct task_struct *task)
 inline bool test_task_is_rt(struct task_struct *task)
 {
 	DEBUG_BUG_ON(!task);
-
-#ifdef CONFIG_HMBIRD_SCHED
-	if (hmbird_sched_ops && hmbird_sched_ops->task_is_scx
-				&& hmbird_sched_ops->task_is_scx(task))
-		return false;
-#endif
 	/* valid RT priority is 0..MAX_RT_PRIO-1 */
 	if ((task->prio >= 0) && (task->prio <= MAX_RT_PRIO-1))
 		return true;

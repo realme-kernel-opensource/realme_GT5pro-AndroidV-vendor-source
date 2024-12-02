@@ -11,8 +11,6 @@ def define_oplus_local_modules():
             "**/*.c",
         ]),
         includes = ["."],
-        ko_deps = ["//vendor/oplus/kernel/cpu/sched_ext:oplus_bsp_sched_ext"],
-        header_deps = ["//vendor/oplus/kernel/cpu/sched_ext:config_headers"],
         copts = select({
             "//build/kernel/kleaf:kocov_is_true": ["-fprofile-arcs", "-ftest-coverage"],
             "//conditions:default": [],

@@ -15,10 +15,6 @@
 #include "kgsl_timeline.h"
 #include <linux/msm_kgsl.h>
 
-#ifdef CONFIG_HMBIRD_SCHED_GKI
-#include <linux/sched/sched_ext.h>
-#endif
-
 /*
  * Number of commands that can be queued in a context before it sleeps
  *
@@ -2040,9 +2036,6 @@ int adreno_hwsched_init(struct adreno_device *adreno_dev,
 	}
 
 	sched_set_fifo(hwsched->worker->task);
-#if defined(CONFIG_HMBIRD_SCHED) || defined(CONFIG_HMBIRD_SCHED_GKI)
-	sched_set_sched_prop(hwsched->worker->task, SCHED_PROP_DEADLINE_LEVEL3);
-#endif
 	WARN_ON(sysfs_create_files(&device->dev->kobj, _hwsched_attr_list));
 	adreno_set_dispatch_ops(adreno_dev, &hwsched_ops);
 	hwsched->hwsched_ops = target_hwsched_ops;

@@ -140,9 +140,6 @@ static int rt_info_show(struct seq_file *m, void *v)
 	char *page;
 	char task_name[TASK_COMM_LEN];
 	ssize_t len = 0;
-#ifdef CONFIG_HMBIRD_SCHED
-	int prop;
-#endif /* CONFIG_HMBIRD_SCHED */
 
 	if (atomic_read(&have_valid_render_pid) == 0)
 		return -ESRCH;
@@ -184,13 +181,6 @@ static int rt_info_show(struct seq_file *m, void *v)
 		if (get_task_name(results[i].pid, results[i].task, task_name)) {
 			len += snprintf(page + len, RESULT_PAGE_SIZE - len, "%d;%s;%u\n",
 				results[i].pid, task_name, results[i].wake_count);
-#ifdef CONFIG_HMBIRD_SCHED
-			/* only mark top 5 */
-			if (i < 5) {
-				prop = sched_prop_get_top_thread_id(results[i].task);
-				sched_set_sched_prop(results[i].task, SCHED_PROP_DEADLINE_LEVEL3 | prop << SCHED_PROP_TOP_THREAD_SHIFT);
-			}
-#endif /* CONFIG_HMBIRD_SCHED */
 		}
 	}
 

@@ -15,21 +15,11 @@
 
 #include "game_ctrl.h"
 
-#ifdef CONFIG_HMBIRD_SCHED_GKI
-#include "hmbird_gki/scx_main.h"
-#endif
-
 /* To handle cpufreq min/max request */
 struct cpu_freq_status {
 	unsigned int min;
 	unsigned int max;
 };
-
-#ifdef CONFIG_HMBIRD_SCHED_GKI
-extern void scx_gpa_register_qos_max(int cpu, struct freq_qos_request *req_max,
-					struct cpu_freq_status *game_cpu_stats);
-extern bool scx_gpa_could_limits_max(int cpu, unsigned int max_freq);
-#endif
 
 /* gpa: game performance adaptive, from user gameopt service */
 static DEFINE_PER_CPU(struct cpu_freq_status, gpa_cpu_stats);
@@ -101,9 +91,6 @@ static int freq_qos_request_init(void)
 		per_cpu(flt_cpu_stats, cpu).max = FREQ_QOS_MIN_DEFAULT_VALUE; /* by designed */
 		per_cpu(final_cpu_stats, cpu).max = FREQ_QOS_MAX_DEFAULT_VALUE;
 		req = &per_cpu(qos_req_max, cpu);
-#ifdef CONFIG_HMBIRD_SCHED_GKI
-		scx_gpa_register_qos_max(cpu, req, &per_cpu(final_cpu_stats, cpu));
-#endif
 		ret = freq_qos_add_request(&policy->constraints, req,
 			FREQ_QOS_MAX, FREQ_QOS_MAX_DEFAULT_VALUE);
 		if (ret < 0) {
@@ -143,14 +130,7 @@ cleanup:
 
 static void max_freq_qos_update_request(int cpu, struct freq_qos_request *req, unsigned int max_freq)
 {
-	bool allowed = true;
-
-#ifdef CONFIG_HMBIRD_SCHED_GKI
-	allowed = scx_gpa_could_limits_max(cpu, max_freq);
-#endif
-
-	if (allowed)
-		freq_qos_update_request(req, max_freq);
+	freq_qos_update_request(req, max_freq);
 }
 
 static void __freq_qos_request_restore(void)

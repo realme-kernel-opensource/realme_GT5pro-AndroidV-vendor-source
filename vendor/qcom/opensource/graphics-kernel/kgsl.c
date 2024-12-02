@@ -44,10 +44,6 @@
 #include <mm/mm_osvelte/common.h>
 #endif /* CONFIG_OPLUS_FEATURE_MM_OSVELTE */
 
-#ifdef CONFIG_HMBIRD_SCHED_GKI
-#include <linux/sched/sched_ext.h>
-#endif
-
 /* Instantiate tracepoints */
 #define CREATE_TRACE_POINTS
 #include "kgsl_power_trace.h"
@@ -5304,9 +5300,6 @@ int kgsl_device_platform_probe(struct kgsl_device *device)
 	}
 
 	sched_set_fifo(device->events_worker->task);
-#if defined(CONFIG_HMBIRD_SCHED) || defined(CONFIG_HMBIRD_SCHED_GKI)
-	sched_set_sched_prop(device->events_worker->task, SCHED_PROP_DEADLINE_LEVEL3);
-#endif
 
 	status = kgsl_reclaim_init();
 	if (status)

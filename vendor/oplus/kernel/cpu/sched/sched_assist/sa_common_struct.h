@@ -65,49 +65,6 @@ struct locking_info {
 };
 /*#endif*/
 
-/*#if IS_ENABLED(CONFIG_HMBIRD_SCHED_GKI)*/
-#define RAVG_HIST_SIZE 	5
-#define SCX_SLICE_DFL 	(1 * NSEC_PER_MSEC)
-#define SCX_SLICE_INF	U64_MAX
-#define DEFAULT_CGROUP_DL_IDX (8)
-#define EXT_FLAG_RT_CHANGED  	(1 << 0)
-#define EXT_FLAG_CFS_CHANGED 	(1 << 1)
-struct scx_task_stats {
-	u64				mark_start;
-	u64				window_start;
-	u32				sum;
-	u32				sum_history[RAVG_HIST_SIZE];
-	int 			cidx;
-
-	u32				demand;
-	u16				demand_scaled;
-	void 			*sdsq;
-};
-/*
- * The following is embedded in task_struct and contains all fields necessary
- * for a task to be scheduled by SCX.
- */
-struct scx_entity {
-	struct scx_dispatch_q	*dsq;
-	struct {
-		struct list_head	fifo;	/* dispatch order */
-		struct rb_node		priq;	/* p->scx.dsq_vtime order */
-	} dsq_node;
-	u32			flags;		/* protected by rq lock */
-	u32			dsq_flags;	/* protected by dsq lock */
-	s32			sticky_cpu;
-	unsigned long		runnable_at;
-	u64			slice;
-	u64			dsq_vtime;
-	int			gdsq_idx;
-	int 		ext_flags;
-	int 		prio_backup;
-	unsigned long		sched_prop;
-	struct scx_task_stats sts;
-};
-/*#endif*/
-
-
 /* Please add your own members of task_struct here :) */
 struct oplus_task_struct {
 	/* CONFIG_OPLUS_FEATURE_SCHED_ASSIST */
@@ -166,10 +123,6 @@ struct oplus_task_struct {
 /*#if IS_ENABLED(CONFIG_OPLUS_LOCKING_STRATEGY)*/
 	struct locking_info lkinfo;
 /*#endif*/
-/*#if IS_ENABLED(CONFIG_SCX_SCHED_GKI_ENABLE)*/
-	struct scx_entity scx;
-/*#endif*/
-
 /*#if IS_ENABLED(CONFIG_OPLUS_FEATURE_FDLEAK_CHECK)*/
 	u8 fdleak_flag;
 /*#endif*/

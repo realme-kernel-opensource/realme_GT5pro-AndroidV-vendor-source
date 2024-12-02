@@ -9,7 +9,6 @@
 #include <linux/proc_fs.h>
 
 #include "game_ctrl.h"
-#include "es4g_assist.h"
 
 struct proc_dir_entry *game_opt_dir = NULL;
 struct proc_dir_entry *early_detect_dir = NULL;
@@ -34,14 +33,12 @@ static int __init game_ctrl_init(void)
 	rt_info_init();
 	fake_cpufreq_init();
 	debug_init();
-	es4g_assist_init();
 
 	return 0;
 }
 
 static void __exit game_ctrl_exit(void)
 {
-	es4g_assist_exit();
 }
 
 module_init(game_ctrl_init);

@@ -163,13 +163,6 @@ static void init_oplus_task_struct(void *ptr)
 	ots->locking_start_time = 0;
 	ots->locking_depth = 0;
 #endif
-#ifdef CONFIG_HMBIRD_SCHED_GKI
-	INIT_LIST_HEAD(&ots->scx.dsq_node.fifo);
-	RB_CLEAR_NODE(&ots->scx.dsq_node.priq);
-	ots->scx.sticky_cpu	= -1;
-	ots->scx.runnable_at = INITIAL_JIFFIES;
-	ots->scx.gdsq_idx = DEFAULT_CGROUP_DL_IDX;
-#endif
 
 #if IS_ENABLED(CONFIG_OPLUS_FEATURE_LOADBALANCE)
 	/* for loadbalance */
